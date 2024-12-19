@@ -21,7 +21,7 @@ public class UserController {
      */
     @PostMapping
     public UserDto createUser(@Valid @RequestBody UserDto userDto) {
-        log.debug("Создание пользователя " + userDto);
+        log.debug("Запрос на создание пользователя: {}", userDto);
         return userService.save(userDto);
     }
 
@@ -30,7 +30,7 @@ public class UserController {
      */
     @GetMapping
     public List<UserDto> getAllUsers() {
-        log.debug("Получение информации о всех пользователях");
+        log.debug("Запрос на получение информации о всех пользователях");
         return userService.getAll();
     }
 
@@ -39,7 +39,7 @@ public class UserController {
      */
     @GetMapping("/{id}")
     public UserDto getUserById(@Valid @PathVariable Long id) {
-        log.debug("Получение информации о пользователе по id " + id);
+        log.debug("Запрос на получение информации о пользователе по id: {}", id);
         return userService.getById(id);
     }
 
@@ -48,7 +48,7 @@ public class UserController {
      */
     @PatchMapping("/{id}")
     public UserDto updateUser(@Valid @PathVariable Long id, @RequestBody UserDto userDto) {
-        log.debug("Обновление данных пользователя по id " + id);
+        log.debug("Запрос на обновление данных пользователя по id: {}", id);
         return userService.update(id, userDto);
     }
 
@@ -57,7 +57,7 @@ public class UserController {
      */
     @DeleteMapping("/{id}")
     public void deleteUser(@Valid @PathVariable Long id) {
-        log.debug("Удаление пользователя по id " + id);
+        log.debug("Запрос на удаление пользователя по id: {}", id);
         userService.delete(id);
     }
 }

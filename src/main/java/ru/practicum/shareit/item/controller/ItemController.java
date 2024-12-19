@@ -21,7 +21,7 @@ public class ItemController {
      */
     @PostMapping
     public ItemDto create(@Valid @RequestBody ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Long userId) {
-        log.debug("Добавление вещи " + itemDto.getName() + " пользователем " + userId);
+        log.debug("Запрос на добавление вещи: {} пользователем: {}", itemDto.getName(), userId);
         return itemService.create(itemDto, userId);
     }
 
@@ -30,7 +30,7 @@ public class ItemController {
      */
     @PatchMapping("/{itemId}")
     public ItemDto update(@Valid @PathVariable Long itemId, @RequestBody ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Long userId) {
-        log.debug("Обновление информации о вещи с id " + itemId);
+        log.debug("Запрос на обновление информации о вещи с id: {}", itemId);
         return itemService.update(itemId, itemDto, userId);
     }
 
@@ -39,7 +39,7 @@ public class ItemController {
      */
     @GetMapping("/{itemId}")
     public ItemDto getItem(@Valid @PathVariable Long itemId) {
-        log.debug("Получение информации о вещи по id " + itemId);
+        log.debug("Запрос на получение информации о вещи по id: {}", itemId);
         return itemService.getItemById(itemId);
     }
 
@@ -48,7 +48,7 @@ public class ItemController {
      */
     @GetMapping
     public List<ItemDto> getAll(@Valid @RequestHeader("X-Sharer-User-Id") Long userId) {
-        log.debug("Получение информации о всех вещах пользователя с id " + userId);
+        log.debug("Запрос на получение информации о всех вещах пользователя с id: {}", userId);
         return itemService.getAllItems(userId);
     }
 
@@ -57,7 +57,7 @@ public class ItemController {
      */
     @GetMapping("/search")
     public List<ItemDto> search(@Valid @RequestParam String text) {
-        log.debug("Поиск вещи " + text);
+        log.debug("Запрос на поиск вещи: {}", text);
         return itemService.searchItems(text);
     }
 }

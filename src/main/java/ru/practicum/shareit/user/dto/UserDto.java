@@ -13,4 +13,11 @@ public class UserDto {
     @NotBlank(message = "email не может быть пустым")
     @Email(message = "email должен быть корректным")
     private String email;
+
+    @Override
+    public String toString() {
+        return "id=" + id +
+               ", name='" + name +
+               "', email='" + email + "'";
+    }
 }

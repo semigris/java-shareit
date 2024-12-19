@@ -16,4 +16,13 @@ public class ItemDto {
     @NotNull(message = "Доступность должна быть указана")
     private Boolean available;
     private Long requestId;
+
+    @Override
+    public String toString() {
+        return "id=" + id +
+               ", name='" + name +
+               "', description='" + description +
+               "', available=" + available +
+               ", requestId=" + requestId;
+    }
 }
