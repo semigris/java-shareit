@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.service.impl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.SaveBookingDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -29,6 +30,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingMapper bookingMapper;
 
     @Override
+    @Transactional
     public BookingDto create(SaveBookingDto saveBookingDto) {
         log.debug("Создание бронирования {}", saveBookingDto);
 
@@ -55,6 +57,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public BookingDto update(Long bookingId, boolean approved, Long userId) {
         log.debug("Обновление статуса бронирования с {} на {}", bookingId, approved);
 
@@ -78,6 +81,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BookingDto getBookingById(Long bookingId, Long userId) {
         log.debug("Получение бронирования {}", bookingId);
 
@@ -96,6 +100,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookingDto> getAllBookings(Long userId, String state) {
         log.debug("Получение всех бронирований для пользователя {} со статусом {}", userId, state);
 
@@ -128,6 +133,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookingDto> getBookingsForOwner(Long userId, String state) {
         log.debug("Получение бронирований вещей для пользователя {} со статусом {}", userId, state);
 

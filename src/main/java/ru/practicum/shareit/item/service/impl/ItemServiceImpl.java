@@ -4,6 +4,7 @@ import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
@@ -40,6 +41,7 @@ public class ItemServiceImpl implements ru.practicum.shareit.item.service.ItemSe
     private final BookingMapper bookingMapper;
 
     @Override
+    @Transactional
     public ItemDto create(ItemDto itemDto, Long ownerId) {
         log.debug("Создание вещи: {}, владельцем с id: {}", itemDto, ownerId);
 
@@ -56,6 +58,7 @@ public class ItemServiceImpl implements ru.practicum.shareit.item.service.ItemSe
     }
 
     @Override
+    @Transactional
     public ItemDto update(Long itemId, ItemDto itemDto, Long ownerId) {
         log.debug("Обновление вещи с id: {}, новые данные: {}, владельцем с id: {}", itemId, itemDto, ownerId);
 
@@ -84,6 +87,7 @@ public class ItemServiceImpl implements ru.practicum.shareit.item.service.ItemSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ItemExtendedDto getItemById(Long itemId, Long userId) {
         log.debug("Получение информации о вещи с id: {} пользователем: {}", itemId, userId);
 
@@ -114,6 +118,7 @@ public class ItemServiceImpl implements ru.practicum.shareit.item.service.ItemSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemDto> getAllItems(Long ownerId) {
         log.debug("Получение всех вещей владельца с id: {}", ownerId);
 
@@ -125,6 +130,7 @@ public class ItemServiceImpl implements ru.practicum.shareit.item.service.ItemSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemDto> searchItems(String text) {
         log.debug("Поиск вещей по тексту: '{}'", text);
 
@@ -142,6 +148,7 @@ public class ItemServiceImpl implements ru.practicum.shareit.item.service.ItemSe
     }
 
     @Override
+    @Transactional
     public CommentDto addComment(Long itemId, Long userId, CommentDto commentDto) {
         log.debug("Добавление комментария на вещь: {}", itemId);
 

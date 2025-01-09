@@ -3,6 +3,8 @@ package ru.practicum.shareit.user.service.impl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.NotValidException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -21,6 +23,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
+    @Transactional
     public UserDto save(UserDto userDto) {
         log.debug("Создание пользователя: {}", userDto);
 
@@ -37,6 +40,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserDto> getAll() {
         log.debug("Получение информации о всех пользователях");
 
@@ -50,25 +54,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto getById(Long id) {
         log.debug("Получение информации о пользователе по id: " + id);
 
         UserDto foundUser = userRepository.findById(id)
                 .map(userMapper::toUserDto)
-                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
         log.debug("По id {} найден пользователь: {}", id, foundUser);
         return foundUser;
     }
 
     @Override
+    @Transactional
     public UserDto update(Long id, UserDto userDto) {
         log.debug("Обновление данных пользователя по id: {}, новые данные: {}", id, userDto);
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Попытка обновления несуществующего пользователя с id: {}", id);
-                    return new IllegalArgumentException("Пользователь не найден");
+                    return new NotFoundException("Пользователь не найден");
                 });
 
         if (userDto.getName() != null) {
@@ -81,7 +87,6 @@ public class UserServiceImpl implements UserService {
                 throw new NotValidException("Пользователь с такой электронной почтой уже существует");
             }
             user.setEmail(userDto.getEmail());
-            user.setEmail(userDto.getEmail());
         }
         userRepository.save(user);
         UserDto updatedUser = userMapper.toUserDto(user);
@@ -91,6 +96,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         log.debug("Удаление пользователя с id: {}", id);
 
