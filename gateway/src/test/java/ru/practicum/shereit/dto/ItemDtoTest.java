@@ -12,12 +12,12 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.test.context.ContextConfiguration;
 import ru.practicum.shareit.ShareItGateway;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.request.dto.CreateRequestDto;
 
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @JsonTest
 @ContextConfiguration(classes = ShareItGateway.class)
 class ItemDtoTest {

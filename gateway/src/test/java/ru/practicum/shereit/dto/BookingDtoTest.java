@@ -18,6 +18,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @JsonTest
 @ContextConfiguration(classes = ShareItGateway.class)
 class BookingDtoTest {
@@ -71,6 +72,7 @@ class BookingDtoTest {
         assertTrue(violations.stream()
                 .anyMatch(violation -> violation.getMessage().equals("Дата окончания бронирования должна быть указана")));
     }
+
     @Test
     void shouldFailValidationWhenEndIsBeforeNow() {
         CreateBookingDto invalidBookingDto = new CreateBookingDto();
