@@ -2,8 +2,8 @@ package ru.practicum.shareit.request.mapper;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.dto.ItemForRequestByIdDto;
-import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.request.dto.CreateRequestDto;
+import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.request.model.Request;
 
 import java.util.List;
