@@ -25,9 +25,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
-@SpringBootTest(
-        properties = "jdbc.url=jdbc:postgresql://localhost:5432/test",
-        webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(properties = "jdbc.url=jdbc:postgresql://localhost:5432/test", webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class ItemServiceImplTest {
 
@@ -62,7 +60,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void shouldCreateItemIfOwnerNotFound() {
+    void shouldFailCreateItemIfOwnerNotFound() {
         ItemDto itemDto = new ItemDto();
         itemDto.setName("Item");
         itemDto.setDescription("Item Description");
@@ -70,6 +68,23 @@ class ItemServiceImplTest {
 
         Exception exception = assertThrows(NotFoundException.class, () -> itemService.create(itemDto, 999L));
         assertEquals("Пользователь с id: 999 не найден", exception.getMessage());
+    }
+
+    @Test
+    void shouldFailCreateItemIfRequestNotFound() {
+        UserDto owner = new UserDto();
+        owner.setName("User Name");
+        owner.setEmail("User@mail.com");
+        UserDto createdOwner = userService.create(owner);
+
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("Item");
+        itemDto.setDescription("Item Description");
+        itemDto.setAvailable(true);
+        itemDto.setRequestId(9L);
+
+        Exception exception = assertThrows(NotFoundException.class, () -> itemService.create(itemDto, createdOwner.getId()));
+        assertEquals("Запрос не найден", exception.getMessage());
     }
 
     @Test
@@ -114,10 +129,26 @@ class ItemServiceImplTest {
         ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
 
         createdItem.setName("Updated Item");
-        Exception exception = assertThrows(NotFoundException.class, () ->
-                itemService.update(createdItem.getId(), createdItem, createdAnotherUser.getId()));
+        Exception exception = assertThrows(NotFoundException.class, () -> itemService.update(createdItem.getId(), createdItem, createdAnotherUser.getId()));
 
         assertEquals("Вещь может быть обновлена только владельцем", exception.getMessage());
+    }
+
+    @Test
+    void shouldFailtUpdateIfItemNotFound() {
+        UserDto owner = new UserDto();
+        owner.setName("User Name");
+        owner.setEmail("User@mail.com");
+        UserDto createdOwner = userService.create(owner);
+
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("Item");
+        itemDto.setDescription("Item Description");
+        itemDto.setAvailable(true);
+        ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
+
+        Exception exception = assertThrows(NotFoundException.class, () -> itemService.update(999L, createdItem, createdOwner.getId()));
+        assertEquals("Вещь с id: 999 не найдена", exception.getMessage());
     }
 
     @Test
@@ -227,6 +258,39 @@ class ItemServiceImplTest {
     }
 
     @Test
+    void shouldFailAddCommentIfItemNotFound() {
+        CommentDto comment = new CommentDto();
+        comment.setText("Item Comment");
+        comment.setAuthorName("user Name");
+        comment.setCreated(LocalDateTime.now());
+
+        Exception exception = assertThrows(NotFoundException.class, () -> itemService.addComment(999L, 1L, comment));
+        assertEquals("Вещь с id: 999 не найдена", exception.getMessage());
+    }
+
+    @Test
+    void shouldFailAddCommentIfUserNotFound() {
+        UserDto user = new UserDto();
+        user.setName("User");
+        user.setEmail("User@mail.com");
+        UserDto createdUser = userService.create(user);
+
+        ItemDto item = new ItemDto();
+        item.setName("Item");
+        item.setDescription("Item Description");
+        item.setAvailable(true);
+        ItemDto createdItem = itemService.create(item, createdUser.getId());
+
+        CommentDto comment = new CommentDto();
+        comment.setText("Item Comment");
+        comment.setAuthorName(createdUser.getName());
+        comment.setCreated(LocalDateTime.now());
+
+        Exception exception = assertThrows(NotFoundException.class, () -> itemService.addComment(createdItem.getId(), 66L, comment));
+        assertEquals("Пользователь с id: 66 не найден", exception.getMessage());
+    }
+
+    @Test
     void shouldFailAddCommentIfUserNotBookedItem() {
         UserDto owner = new UserDto();
         owner.setName("Owner");
@@ -247,8 +311,7 @@ class ItemServiceImplTest {
         CommentDto comment = new CommentDto();
         comment.setText("Item Comment");
 
-        Exception exception = assertThrows(NotValidException.class, () ->
-                itemService.addComment(createdItem.getId(), createdUser.getId(), comment));
+        Exception exception = assertThrows(NotValidException.class, () -> itemService.addComment(createdItem.getId(), createdUser.getId(), comment));
 
         assertEquals("Пользователь не может оставить комментарий, так как не брал эту вещь в аренду.", exception.getMessage());
     }
@@ -271,8 +334,7 @@ class ItemServiceImplTest {
         itemDto.setAvailable(true);
         ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
 
-        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(), createdUser.getId(),
-                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(3));
+        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(), createdUser.getId(), LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(3));
         BookingDto createdBooking = bookingService.create(bookingDto);
 
         bookingService.update(createdBooking.getId(), true, createdOwner.getId());
@@ -280,8 +342,7 @@ class ItemServiceImplTest {
         CommentDto comment = new CommentDto();
         comment.setText("Item Comment");
 
-        Exception exception = assertThrows(NotValidException.class, () ->
-                itemService.addComment(createdItem.getId(), createdUser.getId(), comment));
+        Exception exception = assertThrows(NotValidException.class, () -> itemService.addComment(createdItem.getId(), createdUser.getId(), comment));
 
         assertEquals("Пользователь не может оставить комментарий, так как аренда вещи еще не завершена.", exception.getMessage());
     }

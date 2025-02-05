@@ -22,7 +22,7 @@ public class ExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
         log.error("Error 400: Валидация аргументов: {}", e.getBindingResult().getAllErrors().getFirst().getDefaultMessage());
-        return new ErrorResponse(e.getMessage());
+        return new ErrorResponse(e.getBindingResult().getAllErrors().getFirst().getDefaultMessage());
     }
 
     @org.springframework.web.bind.annotation.ExceptionHandler
