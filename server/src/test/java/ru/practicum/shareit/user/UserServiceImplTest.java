@@ -1,4 +1,4 @@
-package ru.practicum.shareit.integrationTestSuite;
+package ru.practicum.shareit.user;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

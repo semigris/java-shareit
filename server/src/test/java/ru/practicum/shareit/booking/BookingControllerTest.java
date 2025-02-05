@@ -1,4 +1,4 @@
-package ru.practicum.shareit.endpointTestSuite;
+package ru.practicum.shareit.booking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -80,7 +80,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void shouldgGetBooking() throws Exception {
+    void shouldGetBooking() throws Exception {
         Long bookingId = 1L;
         Long userId = 2L;
         BookingDto bookingDto = new BookingDto();

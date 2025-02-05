@@ -1,4 +1,4 @@
-package ru.practicum.shereit.dto;
+package ru.practicum.shereit.item;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -43,7 +43,6 @@ class CommentDtoTest {
         Set<ConstraintViolation<CommentDto>> violations = validator.validate(invalidCommentDto);
 
         assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(violation -> violation.getMessage().equals("Текст комментария должен быть заполнен")));
+        assertTrue(violations.stream().anyMatch(violation -> violation.getMessage().equals("Текст комментария должен быть заполнен")));
     }
 }

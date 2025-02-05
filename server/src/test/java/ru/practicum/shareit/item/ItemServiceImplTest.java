@@ -1,4 +1,4 @@
-package ru.practicum.shareit.integrationTestSuite;
+package ru.practicum.shareit.item;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -7,6 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.CreateBookingDto;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.NotValidException;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
@@ -32,6 +35,8 @@ class ItemServiceImplTest {
     private ItemService itemService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private BookingService bookingService;
 
     @PersistenceContext
     private EntityManager em;
@@ -63,7 +68,8 @@ class ItemServiceImplTest {
         itemDto.setDescription("Item Description");
         itemDto.setAvailable(true);
 
-        assertThrows(NotFoundException.class, () -> itemService.create(itemDto, 999L));
+        Exception exception = assertThrows(NotFoundException.class, () -> itemService.create(itemDto, 999L));
+        assertEquals("Пользователь с id: 999 не найден", exception.getMessage());
     }
 
     @Test
@@ -90,6 +96,31 @@ class ItemServiceImplTest {
     }
 
     @Test
+    void shouldFailtUpdateIfNotOwner() {
+        UserDto owner = new UserDto();
+        owner.setName("Owner");
+        owner.setEmail("owner@mail.com");
+        UserDto createdOwner = userService.create(owner);
+
+        UserDto anotherUser = new UserDto();
+        anotherUser.setName("Another User");
+        anotherUser.setEmail("another@mail.com");
+        UserDto createdAnotherUser = userService.create(anotherUser);
+
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("Item");
+        itemDto.setDescription("Item Description");
+        itemDto.setAvailable(true);
+        ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
+
+        createdItem.setName("Updated Item");
+        Exception exception = assertThrows(NotFoundException.class, () ->
+                itemService.update(createdItem.getId(), createdItem, createdAnotherUser.getId()));
+
+        assertEquals("Вещь может быть обновлена только владельцем", exception.getMessage());
+    }
+
+    @Test
     void shouldGetItem() {
         UserDto owner = new UserDto();
         owner.setName("User Name");
@@ -110,7 +141,8 @@ class ItemServiceImplTest {
 
     @Test
     void shouldGetItemIfItemNotFound() {
-        assertThrows(NotFoundException.class, () -> itemService.getItemById(999L, 1L));
+        Exception exception = assertThrows(NotFoundException.class, () -> itemService.getItemById(999L, 1L));
+        assertEquals("Вещь с id: 999 не найдена", exception.getMessage());
     }
 
 
@@ -163,6 +195,12 @@ class ItemServiceImplTest {
     }
 
     @Test
+    void shouldNotSearchItemsIfTextIsBlank() {
+        List<ItemDto> results = itemService.searchItems("");
+        assertTrue(results.isEmpty());
+    }
+
+    @Test
     void shouldAddComment() {
         UserDto owner = new UserDto();
         owner.setName("Owner");
@@ -182,9 +220,69 @@ class ItemServiceImplTest {
 
 
         CommentDto comment = new CommentDto();
-        comment.setText("Comment about Item");
+        comment.setText("Item Comment");
         comment.setAuthorName(user.getName());
         comment.setCreated(LocalDateTime.now());
         assertThrows(NotValidException.class, () -> itemService.addComment(createdItem.getId(), createdUser.getId(), comment));
+    }
+
+    @Test
+    void shouldFailAddCommentIfUserNotBookedItem() {
+        UserDto owner = new UserDto();
+        owner.setName("Owner");
+        owner.setEmail("owner@mail.com");
+        UserDto createdOwner = userService.create(owner);
+
+        UserDto user = new UserDto();
+        user.setName("User");
+        user.setEmail("user@mail.com");
+        UserDto createdUser = userService.create(user);
+
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("Item");
+        itemDto.setDescription("Item Description");
+        itemDto.setAvailable(true);
+        ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
+
+        CommentDto comment = new CommentDto();
+        comment.setText("Item Comment");
+
+        Exception exception = assertThrows(NotValidException.class, () ->
+                itemService.addComment(createdItem.getId(), createdUser.getId(), comment));
+
+        assertEquals("Пользователь не может оставить комментарий, так как не брал эту вещь в аренду.", exception.getMessage());
+    }
+
+    @Test
+    void shouldFailAddCommentIfBookingNotFinished() {
+        UserDto owner = new UserDto();
+        owner.setName("Owner");
+        owner.setEmail("owner@mail.com");
+        UserDto createdOwner = userService.create(owner);
+
+        UserDto user = new UserDto();
+        user.setName("User");
+        user.setEmail("user@mail.com");
+        UserDto createdUser = userService.create(user);
+
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("Item");
+        itemDto.setDescription("Item Description");
+        itemDto.setAvailable(true);
+        ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
+
+        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(), createdUser.getId(),
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(3));
+        BookingDto createdBooking = bookingService.create(bookingDto);
+
+        bookingService.update(createdBooking.getId(), true, createdOwner.getId());
+
+        CommentDto comment = new CommentDto();
+        comment.setText("Item Comment");
+
+        Exception exception = assertThrows(NotValidException.class, () ->
+                itemService.addComment(createdItem.getId(), createdUser.getId(), comment));
+
+        assertEquals("Пользователь не может оставить комментарий, так как аренда вещи еще не завершена.", exception.getMessage());
     }
 }

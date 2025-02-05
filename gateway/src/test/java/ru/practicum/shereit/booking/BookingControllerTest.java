@@ -1,4 +1,4 @@
-package ru.practicum.shereit.endpointTestSuite;
+package ru.practicum.shereit.booking;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

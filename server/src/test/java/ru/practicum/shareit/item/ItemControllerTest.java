@@ -1,4 +1,4 @@
-package ru.practicum.shareit.endpointTestSuite;
+package ru.practicum.shareit.item;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -121,7 +121,7 @@ class ItemControllerTest {
         Long userId = 1L;
         Long itemId = 2L;
         CommentDto commentDto = new CommentDto();
-        commentDto.setText("Comment about Item");
+        commentDto.setText("Item Comment");
 
         when(itemService.addComment(eq(itemId), eq(userId), any(CommentDto.class))).thenReturn(commentDto);
 
@@ -130,6 +130,6 @@ class ItemControllerTest {
                         .header("X-Sharer-User-Id", userId)
                         .content(objectMapper.writeValueAsString(commentDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text").value("Comment about Item"));
+                .andExpect(jsonPath("$.text").value("Item Comment"));
     }
 }

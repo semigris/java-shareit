@@ -1,4 +1,4 @@
-package ru.practicum.shereit.endpointTestSuite;
+package ru.practicum.shereit.item;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -119,7 +119,7 @@ class ItemControllerTest {
         Long itemId = 1L;
         Long userId = 2L;
         CommentDto commentDto = new CommentDto();
-        commentDto.setText("Comment about Item");
+        commentDto.setText("Item Comment");
 
         when(itemClient.addComment(eq(itemId), any(CommentDto.class), eq(userId))).thenReturn(ResponseEntity.ok("Comment added"));
 

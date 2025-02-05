@@ -1,4 +1,4 @@
-package ru.practicum.shereit.dto;
+package ru.practicum.shereit.request;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;

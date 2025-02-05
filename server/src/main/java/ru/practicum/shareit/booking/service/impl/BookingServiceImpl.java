@@ -41,7 +41,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         User booker = userRepository.findById(createBookingDto.getUserId())
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         if (item.getOwner().getId().equals(booker.getId())) {
             throw new RuntimeException("Нельзя забронировать свою же вещь");
         }
