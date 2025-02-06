@@ -2,12 +2,14 @@ package ru.practicum.shareit.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
-import ru.practicum.shareit.user.dto.validationGroups.Create;
-import ru.practicum.shareit.user.dto.validationGroups.Update;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import ru.practicum.shareit.user.dto.validationgroups.Create;
+import ru.practicum.shareit.user.dto.validationgroups.Update;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString

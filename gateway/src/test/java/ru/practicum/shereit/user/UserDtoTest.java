@@ -12,7 +12,7 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.test.context.ContextConfiguration;
 import ru.practicum.shareit.ShareItGateway;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.validationGroups.Create;
+import ru.practicum.shareit.user.dto.validationgroups.Create;
 
 import java.util.Set;
 

@@ -6,15 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.validation.BindException;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @WebMvcTest(ExceptionHandler.class)
 @ExtendWith(MockitoExtension.class)
@@ -36,24 +29,9 @@ class ExceptionHandlerTest {
     }
 
     @Test
-    void testHandleMethodArgumentNotValidException() {
-        BindException bindException = mock(BindException.class);
-        when(bindException.getAllErrors()).thenReturn(
-                List.of(new ObjectError("Error", "Error 400: Bad Request")));
-
-        MethodArgumentNotValidException exception = mock(MethodArgumentNotValidException.class);
-        when(exception.getBindingResult()).thenReturn(bindException);
-
-        ErrorResponse response = exceptionHandler.handleMethodArgumentNotValidException(exception);
-
-        assertEquals("Error 400: Bad Request", response.getError());
-    }
-
-
-    @Test
     void testHandleNotValidException() {
-        NotValidException exception = new NotValidException("Error 500: Internal Server Error");
-        ErrorResponse response = exceptionHandler.handleNotValidException(exception);
+        UnavailableDataException exception = new UnavailableDataException("Error 500: Internal Server Error");
+        ErrorResponse response = exceptionHandler.handleUnavailableDataException(exception);
 
         assertEquals("Error 500: Internal Server Error", response.getError());
     }

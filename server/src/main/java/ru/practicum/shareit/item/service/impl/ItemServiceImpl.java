@@ -6,11 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.NotValidException;
+import ru.practicum.shareit.exception.UnavailableDataException;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.comment.mapper.CommentMapper;
 import ru.practicum.shareit.item.comment.model.Comment;
@@ -94,7 +95,7 @@ public class ItemServiceImpl implements ItemService {
         }
 
         log.warn("Попытка обновления вещи с id {} пользователем, не являющимся её владельцем: {}", itemId, ownerId);
-        throw new NotFoundException("Вещь может быть обновлена только владельцем");
+        throw new UnavailableDataException("Вещь может быть обновлена только владельцем");
     }
 
     @Override
@@ -171,15 +172,15 @@ public class ItemServiceImpl implements ItemService {
         List<Booking> bookings = bookingRepository.findByItemIdAndBookerId(itemId, userId);
 
         boolean hasRented = bookings.stream()
-                .anyMatch(booking -> booking.getStatus() == Booking.Status.APPROVED);
+                .anyMatch(booking -> booking.getStatus() == Status.APPROVED);
         if (!hasRented) {
-            throw new NotValidException("Пользователь не может оставить комментарий, так как не брал эту вещь в аренду.");
+            throw new UnavailableDataException("Пользователь не может оставить комментарий, так как не брал эту вещь в аренду.");
         }
 
         boolean hasFinishedRent = bookings.stream()
                 .anyMatch(booking -> booking.getEnd().isBefore(LocalDateTime.now()));
         if (!hasFinishedRent) {
-            throw new NotValidException("Пользователь не может оставить комментарий, так как аренда вещи еще не завершена.");
+            throw new UnavailableDataException("Пользователь не может оставить комментарий, так как аренда вещи еще не завершена.");
         }
 
         Comment comment = commentMapper.toComment(commentDto, author, item);

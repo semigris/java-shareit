@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.NotValidException;
+import ru.practicum.shareit.exception.UnavailableDataException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -58,7 +58,7 @@ class UserServiceImplTest {
 
         userService.create(userDto);
 
-        assertThrows(NotValidException.class, () -> userService.create(userDto));
+        assertThrows(UnavailableDataException.class, () -> userService.create(userDto));
     }
 
     @Test
@@ -128,7 +128,7 @@ class UserServiceImplTest {
 
     @Test
     void shouldDeleteUserIfUserNotFound() {
-        assertThrows(IllegalArgumentException.class, () -> userService.delete(999L));
+        assertThrows(NotFoundException.class, () -> userService.delete(999L));
     }
 
     @Test

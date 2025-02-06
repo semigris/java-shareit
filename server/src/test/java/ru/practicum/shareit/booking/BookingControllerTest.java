@@ -12,7 +12,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.controller.BookingController;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.CreateBookingDto;
-import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.enums.State;
+import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -41,9 +42,9 @@ class BookingControllerTest {
 
     @Test
     void shouldCreateBooking() throws Exception {
+        Long userId = 2L;
         CreateBookingDto createBookingDto = new CreateBookingDto();
         createBookingDto.setItemId(1L);
-        createBookingDto.setUserId(2L);
         createBookingDto.setStart(LocalDateTime.now().plusDays(1));
         createBookingDto.setEnd(LocalDateTime.now().plusDays(2));
 
@@ -52,10 +53,11 @@ class BookingControllerTest {
         bookingDto.setItem(new ItemDto());
         bookingDto.setBooker(new UserDto());
 
-        when(bookingService.create(any(CreateBookingDto.class))).thenReturn(bookingDto);
+        when(bookingService.create(any(CreateBookingDto.class), eq(userId))).thenReturn(bookingDto);
 
         mockMvc.perform(post("/bookings")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", userId)
                         .content(objectMapper.writeValueAsString(createBookingDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L));
@@ -68,7 +70,7 @@ class BookingControllerTest {
         boolean approved = true;
         BookingDto bookingDto = new BookingDto();
         bookingDto.setId(bookingId);
-        bookingDto.setStatus(Booking.Status.APPROVED.toString());
+        bookingDto.setStatus(Status.APPROVED);
 
         when(bookingService.update(eq(bookingId), eq(approved), eq(userId))).thenReturn(bookingDto);
 
@@ -97,13 +99,13 @@ class BookingControllerTest {
     @Test
     void shouldGetAllBookings() throws Exception {
         Long userId = 2L;
-        String state = "ALL";
+        State state = State.ALL;
         List<BookingDto> bookings = List.of(new BookingDto());
 
         when(bookingService.getAllBookings(eq(userId), eq(state))).thenReturn(bookings);
 
         mockMvc.perform(get("/bookings")
-                        .param("state", state)
+                        .param("state", String.valueOf(state))
                         .header("X-Sharer-User-Id", userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
@@ -112,13 +114,13 @@ class BookingControllerTest {
     @Test
     void shouldGetBookingsForOwner() throws Exception {
         Long userId = 2L;
-        String state = "ALL";
+        State state = State.ALL;
         List<BookingDto> bookings = List.of(new BookingDto());
 
         when(bookingService.getBookingsForOwner(eq(userId), eq(state))).thenReturn(bookings);
 
         mockMvc.perform(get("/bookings/owner")
-                        .param("state", state)
+                        .param("state", String.valueOf(state))
                         .header("X-Sharer-User-Id", userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());

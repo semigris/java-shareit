@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.CreateBookingDto;
+import ru.practicum.shareit.booking.enums.State;
 
 @Slf4j
 @RestController
@@ -18,8 +19,7 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<Object> createBooking(@RequestBody @Valid CreateBookingDto createBookingDto, @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.debug("Запрос на добавление бронирования: {} пользователем: {}", createBookingDto.getItemId(), userId);
-        createBookingDto.setUserId(userId);
-        return bookingClient.createBooking(createBookingDto);
+        return bookingClient.createBooking(userId, createBookingDto);
     }
 
     @PatchMapping("/{bookingId}")
@@ -35,13 +35,13 @@ public class BookingController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllBookings(@RequestParam(defaultValue = "ALL") String state, @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<Object> getAllBookings(@RequestParam(defaultValue = "ALL") State state, @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.debug("Запрос на получение списка всех бронирований пользователя: {}", userId);
         return bookingClient.getAllBookings(userId, state);
     }
 
     @GetMapping("/owner")
-    public ResponseEntity<Object> getBookingsForOwner(@RequestParam(defaultValue = "ALL") String state, @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<Object> getBookingsForOwner(@RequestParam(defaultValue = "ALL") State state, @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.debug("Запрос на получение списка бронирований для всех вещей пользователя: {}", userId);
         return bookingClient.getBookingsForOwner(userId, state);
     }

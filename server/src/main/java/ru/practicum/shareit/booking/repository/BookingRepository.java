@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT b FROM Booking b WHERE b.booker.id = :userId AND b.start > CURRENT_TIMESTAMP")
     List<Booking> findFutureBookingsByBookerId(Long userId);
 
-    List<Booking> findByBookerIdAndStatus(Long userId, Booking.Status status);
+    List<Booking> findByBookerIdAndStatus(Long userId, Status status);
 
     @Query("SELECT b FROM Booking b WHERE b.item.owner.id = :userId ORDER BY b.start DESC")
     List<Booking> findByOwnerIdOrderByStartDesc(Long userId);
@@ -35,7 +36,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findFutureBookingsByOwnerId(Long userId);
 
     @Query("SELECT b FROM Booking b WHERE b.item.owner.id = :userId AND b.status = :status")
-    List<Booking> findByOwnerIdAndStatus(Long userId, Booking.Status status);
+    List<Booking> findByOwnerIdAndStatus(Long userId, Status status);
 
     List<Booking> findByItemIdAndBookerId(Long itemId, Long userId);
 

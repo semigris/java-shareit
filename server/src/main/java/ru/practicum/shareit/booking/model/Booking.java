@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -36,8 +37,4 @@ public class Booking {
     @Enumerated
     @Column(name = "status", nullable = false)
     private Status status;
-
-    public enum Status {
-        WAITING, APPROVED, REJECTED, CANCELED
-    }
 }

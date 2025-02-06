@@ -6,8 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.validationGroups.Create;
-import ru.practicum.shareit.user.dto.validationGroups.Update;
+import ru.practicum.shareit.user.dto.validationgroups.Create;
+import ru.practicum.shareit.user.dto.validationgroups.Update;
 
 @Slf4j
 @RestController

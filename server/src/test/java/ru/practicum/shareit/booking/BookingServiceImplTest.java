@@ -9,10 +9,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.CreateBookingDto;
-import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.enums.State;
+import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.NotValidException;
+import ru.practicum.shareit.exception.UnavailableDataException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -58,10 +59,10 @@ class BookingServiceImplTest {
         itemDto.setAvailable(true);
         ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
 
-        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(), createdBooker.getId(),
+        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(),
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
 
-        BookingDto createdBooking = bookingService.create(bookingDto);
+        BookingDto createdBooking = bookingService.create(bookingDto, createdBooker.getId());
 
         assertNotNull(createdBooking);
         assertEquals(createdItem.getId(), createdBooking.getItem().getId());
@@ -70,10 +71,10 @@ class BookingServiceImplTest {
 
     @Test
     void shouldFailCreateBookingIfItemNotFound() {
-        CreateBookingDto bookingDto = new CreateBookingDto(999L, 1L,
+        CreateBookingDto bookingDto = new CreateBookingDto(999L,
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
 
-        Exception exception = assertThrows(NotFoundException.class, () -> bookingService.create(bookingDto));
+        Exception exception = assertThrows(NotFoundException.class, () -> bookingService.create(bookingDto, 1L));
         assertEquals("Вещь не найдена", exception.getMessage());
     }
 
@@ -95,10 +96,10 @@ class BookingServiceImplTest {
         itemDto.setAvailable(false);
         ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
 
-        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(), createdBooker.getId(),
+        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(),
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
 
-        Exception exception = assertThrows(RuntimeException.class, () -> bookingService.create(bookingDto));
+        Exception exception = assertThrows(RuntimeException.class, () -> bookingService.create(bookingDto, createdBooker.getId()));
         assertEquals("Вещь недоступна для бронирования", exception.getMessage());
     }
 
@@ -115,10 +116,10 @@ class BookingServiceImplTest {
         itemDto.setAvailable(true);
         ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
 
-        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(), 999L,
+        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(),
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
 
-        Exception exception = assertThrows(NotFoundException.class, () -> bookingService.create(bookingDto));
+        Exception exception = assertThrows(NotFoundException.class, () -> bookingService.create(bookingDto, 999L));
         assertEquals("Пользователь не найден", exception.getMessage());
     }
 
@@ -135,10 +136,10 @@ class BookingServiceImplTest {
         itemDto.setAvailable(true);
         ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
 
-        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(), createdOwner.getId(),
+        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(),
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
 
-        Exception exception = assertThrows(RuntimeException.class, () -> bookingService.create(bookingDto));
+        Exception exception = assertThrows(RuntimeException.class, () -> bookingService.create(bookingDto, createdOwner.getId()));
         assertEquals("Нельзя забронировать свою же вещь", exception.getMessage());
     }
 
@@ -160,13 +161,13 @@ class BookingServiceImplTest {
         itemDto.setAvailable(true);
         ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
 
-        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(), createdBooker.getId(),
+        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(),
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
-        BookingDto createdBooking = bookingService.create(bookingDto);
+        BookingDto createdBooking = bookingService.create(bookingDto, createdBooker.getId());
 
         BookingDto updatedBooking = bookingService.update(createdBooking.getId(), true, createdOwner.getId());
 
-        assertEquals(Booking.Status.APPROVED.toString(), updatedBooking.getStatus());
+        assertEquals(Status.APPROVED, updatedBooking.getStatus());
     }
 
     @Test
@@ -193,9 +194,9 @@ class BookingServiceImplTest {
         itemDto.setAvailable(true);
         ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
 
-        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(), createdBooker.getId(),
+        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(),
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
-        BookingDto createdBooking = bookingService.create(bookingDto);
+        BookingDto createdBooking = bookingService.create(bookingDto, createdBooker.getId());
 
         Exception exception = assertThrows(RuntimeException.class, () -> bookingService.update(createdBooking.getId(), true, createdBooker.getId()));
         assertEquals("Только владелец вещи может изменить статус бронирования", exception.getMessage());
@@ -219,9 +220,9 @@ class BookingServiceImplTest {
         itemDto.setAvailable(true);
         ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
 
-        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(), createdBooker.getId(),
+        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(),
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
-        BookingDto createdBooking = bookingService.create(bookingDto);
+        BookingDto createdBooking = bookingService.create(bookingDto, createdBooker.getId());
         bookingService.update(createdBooking.getId(), true, createdOwner.getId());
 
         Exception exception = assertThrows(RuntimeException.class, () -> bookingService.update(createdBooking.getId(), false, createdOwner.getId()));
@@ -247,9 +248,9 @@ class BookingServiceImplTest {
         itemDto.setAvailable(true);
         ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
 
-        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(), createdBooker.getId(),
+        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(),
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
-        BookingDto createdBooking = bookingService.create(bookingDto);
+        BookingDto createdBooking = bookingService.create(bookingDto, createdBooker.getId());
 
         BookingDto foundBooking = bookingService.getBookingById(createdBooking.getId(), createdBooker.getId());
 
@@ -286,11 +287,11 @@ class BookingServiceImplTest {
         itemDto.setAvailable(true);
         ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
 
-        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(), createdBooker.getId(),
+        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(),
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
-        BookingDto createdBooking = bookingService.create(bookingDto);
+        BookingDto createdBooking = bookingService.create(bookingDto, createdBooker.getId());
 
-        Exception exception = assertThrows(NotValidException.class, () -> bookingService.getBookingById(createdBooking.getId(), createdNotBookerNotOwner.getId()));
+        Exception exception = assertThrows(UnavailableDataException.class, () -> bookingService.getBookingById(createdBooking.getId(), createdNotBookerNotOwner.getId()));
         assertEquals("Доступ к бронированию запрещён", exception.getMessage());
     }
 
@@ -312,15 +313,15 @@ class BookingServiceImplTest {
         itemDto.setAvailable(true);
         ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
 
-        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(), createdBooker.getId(),
+        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(),
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
-        bookingService.create(bookingDto);
-        List<BookingDto> bookings = bookingService.getAllBookings(createdBooker.getId(), "WAITING");
+        bookingService.create(bookingDto, createdBooker.getId());
+        List<BookingDto> bookings = bookingService.getAllBookings(createdBooker.getId(), State.WAITING);
 
         assertFalse(bookings.isEmpty());
         assertEquals(bookings.size(), 1);
 
-        bookings = bookingService.getAllBookings(createdBooker.getId(), "PAST");
+        bookings = bookingService.getAllBookings(createdBooker.getId(), State.PAST);
 
         assertNotNull(bookings);
         assertTrue(bookings.isEmpty());
@@ -333,7 +334,7 @@ class BookingServiceImplTest {
         booker.setEmail("AnotherUser@mail.com");
         UserDto createdBooker = userService.create(booker);
 
-        List<BookingDto> bookings = bookingService.getAllBookings(createdBooker.getId(), "ALL");
+        List<BookingDto> bookings = bookingService.getAllBookings(createdBooker.getId(), State.ALL);
 
         assertNotNull(bookings);
         assertTrue(bookings.isEmpty());
@@ -341,7 +342,7 @@ class BookingServiceImplTest {
 
     @Test
     void shouldFailGetAllBookingsWithInvalidUser() {
-        Exception exception = assertThrows(RuntimeException.class, () -> bookingService.getAllBookings(999L, "ALL"));
+        Exception exception = assertThrows(RuntimeException.class, () -> bookingService.getAllBookings(999L, State.ALL));
         assertEquals("Пользователь не найден", exception.getMessage());
     }
 
@@ -369,25 +370,25 @@ class BookingServiceImplTest {
         anotherItemDto.setAvailable(true);
         ItemDto createdAnotherItemDto = itemService.create(anotherItemDto, createdOwner.getId());
 
-        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(), createdBooker.getId(),
+        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(),
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
-        bookingService.create(bookingDto);
-        List<BookingDto> bookings = bookingService.getBookingsForOwner(createdOwner.getId(), "WAITING");
+        bookingService.create(bookingDto, createdBooker.getId());
+        List<BookingDto> bookings = bookingService.getBookingsForOwner(createdOwner.getId(), State.WAITING);
 
         assertEquals(bookings.size(), 1);
 
-        CreateBookingDto anotherBookingDto = new CreateBookingDto(createdAnotherItemDto.getId(), createdBooker.getId(),
+        CreateBookingDto anotherBookingDto = new CreateBookingDto(createdAnotherItemDto.getId(),
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
-        bookingService.create(anotherBookingDto);
+        bookingService.create(anotherBookingDto, createdBooker.getId());
 
-        bookings = bookingService.getBookingsForOwner(createdOwner.getId(), "WAITING");
+        bookings = bookingService.getBookingsForOwner(createdOwner.getId(), State.WAITING);
 
         assertEquals(bookings.size(), 2);
     }
 
     @Test
     void shouldFailGetBookingsForOwnerWithInvalidUser() {
-        Exception exception = assertThrows(RuntimeException.class, () -> bookingService.getBookingsForOwner(999L, "ALL"));
+        Exception exception = assertThrows(RuntimeException.class, () -> bookingService.getBookingsForOwner(999L, State.ALL));
         assertEquals("Пользователь не найден", exception.getMessage());
     }
 }

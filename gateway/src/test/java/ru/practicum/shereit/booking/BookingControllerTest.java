@@ -14,6 +14,7 @@ import ru.practicum.shareit.booking.BookingClient;
 import ru.practicum.shareit.booking.BookingController;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.CreateBookingDto;
+import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
@@ -45,7 +46,6 @@ class BookingControllerTest {
         Long userId = 1L;
         CreateBookingDto createBookingDto = new CreateBookingDto();
         createBookingDto.setItemId(1L);
-        createBookingDto.setUserId(userId);
         createBookingDto.setStart(LocalDateTime.now().plusDays(1));
         createBookingDto.setEnd(LocalDateTime.now().plusDays(2));
 
@@ -54,7 +54,7 @@ class BookingControllerTest {
         bookingDto.setItem(new ItemDto());
         bookingDto.setBooker(new UserDto());
 
-        when(bookingClient.createBooking(any(CreateBookingDto.class))).thenReturn(ResponseEntity.ok(bookingDto));
+        when(bookingClient.createBooking(eq(userId), any(CreateBookingDto.class))).thenReturn(ResponseEntity.ok(bookingDto));
 
         ResponseEntity<Object> response = bookingController.createBooking(createBookingDto, userId);
 
@@ -94,7 +94,7 @@ class BookingControllerTest {
     @Test
     void shouldGetAllBookings() {
         Long userId = 2L;
-        String state = "ALL";
+        State state = State.ALL;
         List<BookingDto> bookings = List.of(new BookingDto());
 
         when(bookingClient.getAllBookings(eq(userId), eq(state))).thenReturn(ResponseEntity.ok(bookings));
@@ -107,7 +107,7 @@ class BookingControllerTest {
     @Test
     void shouldGetBookingsForOwner() {
         Long userId = 2L;
-        String state = "ALL";
+        State state = State.ALL;
         List<BookingDto> bookings = List.of(new BookingDto());
 
         when(bookingClient.getBookingsForOwner(eq(userId), eq(state))).thenReturn(ResponseEntity.ok(bookings));

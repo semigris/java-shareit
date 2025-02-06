@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.NotValidException;
+import ru.practicum.shareit.exception.UnavailableDataException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.toUser(userDto);
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             log.warn("Попытка создания пользователя с уже существующей электронной почтой: {}", user.getEmail());
-            throw new NotValidException("Пользователь с такой электронной почтой уже существует");
+            throw new UnavailableDataException("Пользователь с такой электронной почтой уже существует");
         }
         userRepository.save(user);
         UserDto createdUser = userMapper.toUserDto(user);
@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
         if (userDto.getEmail() != null) {
             if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
                 log.warn("Попытка создания пользователя с уже существующей электронной почтой: {}", user.getEmail());
-                throw new NotValidException("Пользователь с такой электронной почтой уже существует");
+                throw new UnavailableDataException("Пользователь с такой электронной почтой уже существует");
             }
             user.setEmail(userDto.getEmail());
         }
@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
 
         if (userRepository.findById(id).isEmpty()) {
             log.warn("Попытка удаления несуществующего пользователя с id: {}", id);
-            throw new IllegalArgumentException("Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
         userRepository.deleteById(id);
 

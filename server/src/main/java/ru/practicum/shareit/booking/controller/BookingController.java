@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.CreateBookingDto;
+import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import java.util.List;
@@ -20,9 +21,9 @@ public class BookingController {
      * Добавление бронирования
      */
     @PostMapping
-    public BookingDto createBooking(@RequestBody CreateBookingDto createBookingDto) {
-        log.debug("Запрос на добавление бронирования: {} пользователем: {}", createBookingDto.getItemId(), createBookingDto.getUserId());
-        return bookingService.create(createBookingDto);
+    public BookingDto createBooking(@RequestBody CreateBookingDto createBookingDto, @RequestHeader("X-Sharer-User-Id") Long userId) {
+        log.debug("Запрос на добавление бронирования: {} пользователем: {}", createBookingDto.getItemId(), userId);
+        return bookingService.create(createBookingDto, userId);
     }
 
     /**
@@ -47,7 +48,7 @@ public class BookingController {
      * Получение списка всех бронирований текущего пользователя
      */
     @GetMapping
-    public List<BookingDto> getAllBookings(@RequestParam(defaultValue = "ALL") String state, @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<BookingDto> getAllBookings(@RequestParam(defaultValue = "ALL") State state, @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.debug("Запрос на получение списка всех бронирований пользователя: {}", userId);
         return bookingService.getAllBookings(userId, state);
     }
@@ -56,7 +57,7 @@ public class BookingController {
      * Получение списка бронирований для всех вещей текущего пользователя
      */
     @GetMapping("/owner")
-    public List<BookingDto> getBookingsForOwner(@RequestParam(defaultValue = "ALL") String state, @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<BookingDto> getBookingsForOwner(@RequestParam(defaultValue = "ALL") State state, @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.debug("Запрос на получение списка бронирований для всех вещей пользователя: {}", userId);
         return bookingService.getBookingsForOwner(userId, state);
     }

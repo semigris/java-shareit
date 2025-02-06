@@ -11,7 +11,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.CreateBookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.NotValidException;
+import ru.practicum.shareit.exception.UnavailableDataException;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemByIdDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -129,7 +129,7 @@ class ItemServiceImplTest {
         ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
 
         createdItem.setName("Updated Item");
-        Exception exception = assertThrows(NotFoundException.class, () -> itemService.update(createdItem.getId(), createdItem, createdAnotherUser.getId()));
+        Exception exception = assertThrows(UnavailableDataException.class, () -> itemService.update(createdItem.getId(), createdItem, createdAnotherUser.getId()));
 
         assertEquals("Вещь может быть обновлена только владельцем", exception.getMessage());
     }
@@ -254,7 +254,7 @@ class ItemServiceImplTest {
         comment.setText("Item Comment");
         comment.setAuthorName(user.getName());
         comment.setCreated(LocalDateTime.now());
-        assertThrows(NotValidException.class, () -> itemService.addComment(createdItem.getId(), createdUser.getId(), comment));
+        assertThrows(UnavailableDataException.class, () -> itemService.addComment(createdItem.getId(), createdUser.getId(), comment));
     }
 
     @Test
@@ -311,7 +311,7 @@ class ItemServiceImplTest {
         CommentDto comment = new CommentDto();
         comment.setText("Item Comment");
 
-        Exception exception = assertThrows(NotValidException.class, () -> itemService.addComment(createdItem.getId(), createdUser.getId(), comment));
+        Exception exception = assertThrows(UnavailableDataException.class, () -> itemService.addComment(createdItem.getId(), createdUser.getId(), comment));
 
         assertEquals("Пользователь не может оставить комментарий, так как не брал эту вещь в аренду.", exception.getMessage());
     }
@@ -334,15 +334,15 @@ class ItemServiceImplTest {
         itemDto.setAvailable(true);
         ItemDto createdItem = itemService.create(itemDto, createdOwner.getId());
 
-        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(), createdUser.getId(), LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(3));
-        BookingDto createdBooking = bookingService.create(bookingDto);
+        CreateBookingDto bookingDto = new CreateBookingDto(createdItem.getId(), LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(3));
+        BookingDto createdBooking = bookingService.create(bookingDto, createdUser.getId());
 
         bookingService.update(createdBooking.getId(), true, createdOwner.getId());
 
         CommentDto comment = new CommentDto();
         comment.setText("Item Comment");
 
-        Exception exception = assertThrows(NotValidException.class, () -> itemService.addComment(createdItem.getId(), createdUser.getId(), comment));
+        Exception exception = assertThrows(UnavailableDataException.class, () -> itemService.addComment(createdItem.getId(), createdUser.getId(), comment));
 
         assertEquals("Пользователь не может оставить комментарий, так как аренда вещи еще не завершена.", exception.getMessage());
     }
